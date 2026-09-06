@@ -5,6 +5,7 @@ import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import { authConfig } from '@/lib/auth.config'
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -12,6 +13,7 @@ const loginSchema = z.object({
 })
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   providers: [
     Credentials({
       credentials: {
@@ -47,24 +49,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   session: {
     strategy: 'jwt',
-  },
-  callbacks: {
-    jwt({ token, user }) {
-      if (user) {
-        token.id = user.id as string
-        token.role = (user as { role: string }).role
-      }
-      return token
-    },
-    session({ session, token }) {
-      if (token) {
-        session.user.id = token.id as string
-        session.user.role = token.role as string
-      }
-      return session
-    },
-  },
-  pages: {
-    signIn: '/login',
   },
 })
