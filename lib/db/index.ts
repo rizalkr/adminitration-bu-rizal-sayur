@@ -1,13 +1,26 @@
-import { neon, neonConfig } from '@neondatabase/serverless'
+import { neon } from '@neondatabase/serverless'
 import { drizzle } from 'drizzle-orm/neon-http'
 import * as schema from './schema'
-import nodeFetch from 'node-fetch'
-import https from 'https'
 
-const agent = new https.Agent({ family: 4 })
-
-neonConfig.fetchFunction = (url: any, init: any) => {
-  return (nodeFetch as any)(url, { ...init, agent })
+// Fix Node.js 22 IPv6 Happy Eyeballs bug in undici/fetch without importing Node native HTTP/HTTPS modules into Next.js
+if (typeof window === 'undefined') {
+  try {
+    const { Agent, setGlobalDispatcher } = require('undici')
+    const dns = require('dns')
+    setGlobalDispatcher(
+      new Agent({
+        connect: {
+          lookup: (hostname: string, options: any, cb: any) => {
+            dns.lookup(hostname, { family: 4 }, (err: any, address: string, family: number) => {
+              cb(err, [{ address, family }])
+            })
+          },
+        },
+      })
+    )
+  } catch (e) {
+    // Ignore in non-Node environments
+  }
 }
 
 const sql = neon(process.env.DATABASE_URL!)
