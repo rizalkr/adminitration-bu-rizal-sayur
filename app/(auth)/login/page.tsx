@@ -42,7 +42,7 @@ export default function LoginPage() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">Kurnia Corp</CardTitle>
+        <CardTitle className="text-2xl font-bold">Bu Rizal Sayur</CardTitle>
         <CardDescription>Masukkan email dan password untuk masuk</CardDescription>
       </CardHeader>
       <CardContent>

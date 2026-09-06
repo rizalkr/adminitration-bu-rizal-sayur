@@ -37,7 +37,7 @@ export function AppSidebar() {
     <aside className="hidden md:flex flex-col w-56 min-h-screen border-r bg-card px-3 py-4 shrink-0">
       {/* Brand */}
       <div className="px-2 mb-6">
-        <h1 className="font-bold text-lg tracking-tight">Kurnia Corp</h1>
+        <h1 className="font-bold text-lg tracking-tight">Bu Rizal Sayur</h1>
         <p className="text-xs text-muted-foreground">Sistem Manajemen</p>
       </div>
 

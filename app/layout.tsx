@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Kurnia Corp — Sistem Manajemen',
+  title: 'Bu Rizal Sayur — Sistem Manajemen',
   description: 'Sistem pencatatan penjualan dan pembelian ternak unggas',
 }
 
