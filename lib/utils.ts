@@ -50,3 +50,35 @@ export function getTodayWIB(): string {
 export function calculateSubtotal(qty: number, unitPrice: number): number {
   return Math.round(qty * unitPrice * 100) / 100
 }
+
+/**
+ * Sanitize a string to prevent CSV / Formula injection (=, +, -, @, \t, \r)
+ */
+export function sanitizeCsvCell(value: unknown): string {
+  if (value === null || value === undefined) return ''
+  let str = String(value)
+  if (str.startsWith('=') || str.startsWith('+') || str.startsWith('-') || str.startsWith('@') || str.startsWith('\t') || str.startsWith('\r')) {
+    str = `'${str}`
+  }
+  // Escape quotes for CSV
+  str = str.replace(/"/g, '""')
+  return `"${str}"`
+}
+
+/**
+ * Format records array as CSV string (UTF-8 with BOM for Excel compatibility)
+ */
+export function generateCsvResponse(filename: string, headers: string[], rows: (string | number | boolean | null | undefined)[][]): Response {
+  const headerLine = headers.map(sanitizeCsvCell).join(',')
+  const rowLines = rows.map((row) => row.map(sanitizeCsvCell).join(','))
+  const csvContent = '\uFEFF' + [headerLine, ...rowLines].join('\r\n')
+
+  return new Response(csvContent, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/csv; charset=utf-8',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+    },
+  })
+}

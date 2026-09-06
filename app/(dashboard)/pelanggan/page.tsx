@@ -22,6 +22,8 @@ export default async function PelangganPage() {
         title="Pelanggan"
         description="Kelola daftar pelanggan"
         action={{ label: '+ Pelanggan Baru', href: '/pelanggan/baru' }}
+        exportHref="/api/export/pelanggan"
+        exportLabel="Export CSV"
       />
 
       <div className="rounded-md border overflow-x-auto">

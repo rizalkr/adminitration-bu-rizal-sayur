@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { getPurchases } from '@/lib/queries/purchases'
 import { PageHeader } from '@/components/layout/page-header'
 import { PaymentStatusBadge } from '@/components/transactions/payment-status-badge'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import {
   Table,
   TableBody,
@@ -23,6 +23,8 @@ export default async function PembelianPage() {
         title="Pembelian"
         description="Daftar seluruh transaksi pembelian"
         action={{ label: '+ Pembelian Baru', href: '/pembelian/baru' }}
+        exportHref="/api/export/pembelian"
+        exportLabel="Export CSV"
       />
 
       <div className="rounded-md border overflow-x-auto">

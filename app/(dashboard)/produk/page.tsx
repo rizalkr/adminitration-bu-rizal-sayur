@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
 import { getProducts } from '@/lib/queries/products'
 import { toggleProductActive, deleteProduct } from '@/lib/actions/products'
 import { PageHeader } from '@/components/layout/page-header'
@@ -24,6 +23,8 @@ export default async function ProdukPage() {
         title="Produk"
         description="Kelola daftar produk unggas"
         action={{ label: '+ Produk Baru', href: '/produk/baru' }}
+        exportHref="/api/export/produk"
+        exportLabel="Export CSV"
       />
 
       <div className="rounded-md border overflow-x-auto">

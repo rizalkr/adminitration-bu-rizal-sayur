@@ -22,6 +22,8 @@ export default async function PemasokPage() {
         title="Pemasok"
         description="Kelola daftar pemasok"
         action={{ label: '+ Pemasok Baru', href: '/pemasok/baru' }}
+        exportHref="/api/export/pemasok"
+        exportLabel="Export CSV"
       />
 
       <div className="rounded-md border overflow-x-auto">
