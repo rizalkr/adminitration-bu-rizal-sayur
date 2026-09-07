@@ -26,6 +26,7 @@ export const customers = pgTable('customers', {
   name: text('name').notNull(),
   desa: text('desa').notNull(),
   dukuh: text('dukuh').notNull(),
+  contact: text('contact'),
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -34,6 +35,7 @@ export const customers = pgTable('customers', {
 export const suppliers = pgTable('suppliers', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: text('name').notNull(),
+  contact: text('contact'),
   address: text('address'),
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

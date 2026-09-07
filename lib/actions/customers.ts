@@ -29,6 +29,7 @@ export async function createCustomer(
     name: formData.get('name'),
     desa: formData.get('desa'),
     dukuh: formData.get('dukuh'),
+    contact: formData.get('contact') || undefined,
   }
 
   const result = customerSchema.safeParse(raw)
@@ -36,8 +37,15 @@ export async function createCustomer(
     return { errors: result.error.flatten().fieldErrors as Record<string, string[]> }
   }
 
+  const contact = result.data.contact?.trim() || null
+
   try {
-    await db.insert(customers).values(result.data)
+    await db.insert(customers).values({
+      name: result.data.name,
+      desa: result.data.desa,
+      dukuh: result.data.dukuh,
+      contact,
+    })
   } catch {
     return { message: 'Gagal menyimpan data pelanggan. Silakan coba lagi.' }
   }
@@ -59,6 +67,7 @@ export async function updateCustomer(
     name: formData.get('name'),
     desa: formData.get('desa'),
     dukuh: formData.get('dukuh'),
+    contact: formData.get('contact') || undefined,
   }
 
   const result = customerSchema.safeParse(raw)
@@ -66,10 +75,18 @@ export async function updateCustomer(
     return { errors: result.error.flatten().fieldErrors as Record<string, string[]> }
   }
 
+  const contact = result.data.contact?.trim() || null
+
   try {
     await db
       .update(customers)
-      .set({ ...result.data, updatedAt: new Date() })
+      .set({
+        name: result.data.name,
+        desa: result.data.desa,
+        dukuh: result.data.dukuh,
+        contact,
+        updatedAt: new Date(),
+      })
       .where(eq(customers.id, id))
   } catch {
     return { message: 'Gagal memperbarui data pelanggan. Silakan coba lagi.' }

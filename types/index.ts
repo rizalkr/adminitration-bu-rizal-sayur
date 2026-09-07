@@ -103,3 +103,24 @@ export type ActionState = {
   errors?: Record<string, string[]>
   message?: string
 }
+
+// ---------------------------------------------------------------------------
+// Transaction Filter & Summary
+// ---------------------------------------------------------------------------
+export type DatePreset = 'today' | 'this-month' | 'last-month' | 'all' | 'custom'
+
+export interface TransactionDateFilter {
+  startDate?: string
+  endDate?: string
+  period?: DatePreset
+}
+
+export interface TransactionSummary {
+  totalAmount: string
+  totalQtyEkor: number
+  totalQtyKg: string
+  transactionCount: number
+  unpaidCount: number
+  unpaidAmount: string
+  paidAmount: string
+}

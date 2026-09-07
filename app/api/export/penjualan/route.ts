@@ -2,13 +2,17 @@ import { auth } from '@/lib/auth'
 import { getSalesExport } from '@/lib/queries/export'
 import { generateCsvResponse, getTodayWIB } from '@/lib/utils'
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await auth()
   if (!session?.user) {
     return new Response('Unauthorized', { status: 401 })
   }
 
-  const sales = await getSalesExport()
+  const { searchParams } = new URL(request.url)
+  const dari = searchParams.get('dari')?.trim() || undefined
+  const sampai = searchParams.get('sampai')?.trim() || undefined
+
+  const sales = await getSalesExport({ startDate: dari, endDate: sampai })
 
   const headers = [
     'sale_id',
@@ -40,6 +44,14 @@ export async function GET() {
     s.paymentStatus,
   ])
 
-  const filename = `penjualan-${getTodayWIB()}.csv`
+  let filename = `penjualan-${getTodayWIB()}.csv`
+  if (dari && sampai) {
+    filename = `penjualan-${dari}-sd-${sampai}.csv`
+  } else if (dari) {
+    filename = `penjualan-sejak-${dari}.csv`
+  } else if (sampai) {
+    filename = `penjualan-hingga-${sampai}.csv`
+  }
+
   return generateCsvResponse(filename, headers, rows)
 }

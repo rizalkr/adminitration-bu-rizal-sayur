@@ -33,6 +33,7 @@ export default async function PelangganPage() {
               <TableHead>Nama</TableHead>
               <TableHead>Desa</TableHead>
               <TableHead>Dukuh</TableHead>
+              <TableHead>Kontak</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
             </TableRow>
@@ -40,7 +41,7 @@ export default async function PelangganPage() {
           <TableBody>
             {customers.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                   Belum ada pelanggan.
                 </TableCell>
               </TableRow>
@@ -50,6 +51,7 @@ export default async function PelangganPage() {
                 <TableCell className="font-medium">{c.name}</TableCell>
                 <TableCell>{c.desa}</TableCell>
                 <TableCell>{c.dukuh}</TableCell>
+                <TableCell className="text-muted-foreground">{c.contact ?? '-'}</TableCell>
                 <TableCell>
                   <Badge variant={c.isActive ? 'default' : 'secondary'}>
                     {c.isActive ? 'Aktif' : 'Non-aktif'}

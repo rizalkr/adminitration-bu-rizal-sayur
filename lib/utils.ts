@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import type { DatePreset, TransactionDateFilter } from '@/types'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -108,4 +109,107 @@ export function generateCsvResponse(filename: string, headers: string[], rows: (
       'Cache-Control': 'no-cache, no-store, must-revalidate',
     },
   })
+}
+
+/**
+ * Get date range for standard presets in Asia/Jakarta timezone.
+ */
+export function getDateRangeForPreset(preset: DatePreset): { startDate?: string; endDate?: string } {
+  const todayStr = getTodayWIB()
+  const [yearStr, monthStr] = todayStr.split('-')
+  const year = parseInt(yearStr, 10)
+  const month = parseInt(monthStr, 10)
+
+  if (preset === 'today') {
+    return { startDate: todayStr, endDate: todayStr }
+  }
+
+  if (preset === 'this-month') {
+    const startStr = `${yearStr}-${String(month).padStart(2, '0')}-01`
+    const lastDay = new Date(year, month, 0).getDate()
+    const endStr = `${yearStr}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
+    return { startDate: startStr, endDate: endStr }
+  }
+
+  if (preset === 'last-month') {
+    const lastMonthYear = month === 1 ? year - 1 : year
+    const lastMonth = month === 1 ? 12 : month - 1
+    const lastMonthStr = String(lastMonth).padStart(2, '0')
+    const startStr = `${lastMonthYear}-${lastMonthStr}-01`
+    const lastDay = new Date(lastMonthYear, lastMonth, 0).getDate()
+    const endStr = `${lastMonthYear}-${lastMonthStr}-${String(lastDay).padStart(2, '0')}`
+    return { startDate: startStr, endDate: endStr }
+  }
+
+  return {}
+}
+
+/**
+ * Parse and resolve transaction filter from URL search parameters.
+ * Defaults to 'this-month' if no parameters are specified.
+ */
+export function resolveTransactionFilter(params?: {
+  period?: string
+  dari?: string
+  sampai?: string
+}): TransactionDateFilter & { displayLabel: string } {
+  const periodParam = params?.period as DatePreset | undefined
+  const dari = params?.dari?.trim()
+  const sampai = params?.sampai?.trim()
+
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/
+  const validDari = dari && dateRegex.test(dari) ? dari : undefined
+  const validSampai = sampai && dateRegex.test(sampai) ? sampai : undefined
+
+  if (periodParam === 'custom' || validDari || validSampai) {
+    let label = 'Rentang Kustom'
+    if (validDari && validSampai) {
+      label = `${formatDate(validDari)} - ${formatDate(validSampai)}`
+    } else if (validDari) {
+      label = `Sejak ${formatDate(validDari)}`
+    } else if (validSampai) {
+      label = `Hingga ${formatDate(validSampai)}`
+    }
+    return {
+      period: 'custom',
+      startDate: validDari,
+      endDate: validSampai,
+      displayLabel: label,
+    }
+  }
+
+  const activePreset: DatePreset = periodParam && ['today', 'this-month', 'last-month', 'all'].includes(periodParam)
+    ? periodParam
+    : 'this-month'
+
+  const { startDate, endDate } = getDateRangeForPreset(activePreset)
+
+  let displayLabel = 'Bulan Ini'
+  if (activePreset === 'today') {
+    displayLabel = `Hari Ini (${formatDate(startDate!)})`
+  } else if (activePreset === 'this-month' && startDate && endDate) {
+    displayLabel = `Bulan Ini (${formatDate(startDate)} - ${formatDate(endDate)})`
+  } else if (activePreset === 'last-month' && startDate && endDate) {
+    displayLabel = `Bulan Lalu (${formatDate(startDate)} - ${formatDate(endDate)})`
+  } else if (activePreset === 'all') {
+    displayLabel = 'Semua Waktu'
+  }
+
+  return {
+    period: activePreset,
+    startDate,
+    endDate,
+    displayLabel,
+  }
+}
+
+/**
+ * Build CSV export URL keeping active date filters.
+ */
+export function buildExportHref(basePath: string, filter: TransactionDateFilter): string {
+  const params = new URLSearchParams()
+  if (filter.startDate) params.set('dari', filter.startDate)
+  if (filter.endDate) params.set('sampai', filter.endDate)
+  const qs = params.toString()
+  return qs ? `${basePath}?${qs}` : basePath
 }

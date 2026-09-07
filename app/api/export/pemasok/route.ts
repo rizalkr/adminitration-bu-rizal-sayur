@@ -10,10 +10,11 @@ export async function GET() {
 
   const suppliers = await getSuppliersExport()
 
-  const headers = ['id', 'name', 'address', 'is_active', 'created_at', 'updated_at']
+  const headers = ['id', 'name', 'contact', 'address', 'is_active', 'created_at', 'updated_at']
   const rows = suppliers.map((s) => [
     s.id,
     s.name,
+    s.contact || '',
     s.address || '',
     s.isActive ? 'true' : 'false',
     s.createdAt ? new Date(s.createdAt).toISOString() : '',

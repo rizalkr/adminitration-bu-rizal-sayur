@@ -31,6 +31,7 @@ export default async function PemasokPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Nama</TableHead>
+              <TableHead>Kontak</TableHead>
               <TableHead>Alamat</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
@@ -39,7 +40,7 @@ export default async function PemasokPage() {
           <TableBody>
             {suppliers.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                   Belum ada pemasok.
                 </TableCell>
               </TableRow>
@@ -47,6 +48,7 @@ export default async function PemasokPage() {
             {suppliers.map((s) => (
               <TableRow key={s.id}>
                 <TableCell className="font-medium">{s.name}</TableCell>
+                <TableCell className="text-muted-foreground">{s.contact ?? '-'}</TableCell>
                 <TableCell className="text-muted-foreground text-sm max-w-48 truncate">
                   {s.address ?? '-'}
                 </TableCell>

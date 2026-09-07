@@ -25,6 +25,7 @@ export async function createSupplier(
 
   const raw = {
     name: formData.get('name'),
+    contact: formData.get('contact') || undefined,
     address: formData.get('address') || undefined,
   }
 
@@ -33,10 +34,11 @@ export async function createSupplier(
     return { errors: result.error.flatten().fieldErrors as Record<string, string[]> }
   }
 
+  const contact = result.data.contact?.trim() || null
   const address = result.data.address || null
 
   try {
-    await db.insert(suppliers).values({ name: result.data.name, address })
+    await db.insert(suppliers).values({ name: result.data.name, contact, address })
   } catch {
     return { message: 'Gagal menyimpan data pemasok. Silakan coba lagi.' }
   }
@@ -56,6 +58,7 @@ export async function updateSupplier(
 
   const raw = {
     name: formData.get('name'),
+    contact: formData.get('contact') || undefined,
     address: formData.get('address') || undefined,
   }
 
@@ -64,12 +67,13 @@ export async function updateSupplier(
     return { errors: result.error.flatten().fieldErrors as Record<string, string[]> }
   }
 
+  const contact = result.data.contact?.trim() || null
   const address = result.data.address || null
 
   try {
     await db
       .update(suppliers)
-      .set({ name: result.data.name, address, updatedAt: new Date() })
+      .set({ name: result.data.name, contact, address, updatedAt: new Date() })
       .where(eq(suppliers.id, id))
   } catch {
     return { message: 'Gagal memperbarui data pemasok. Silakan coba lagi.' }

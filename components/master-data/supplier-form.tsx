@@ -38,6 +38,22 @@ export function SupplierForm({ action, defaultValues, submitLabel = 'Simpan' }: 
       </div>
 
       <div className="space-y-2">
+        <Label htmlFor="contact">
+          Kontak / No. HP <span className="text-muted-foreground text-xs font-normal">(opsional)</span>
+        </Label>
+        <Input
+          id="contact"
+          name="contact"
+          defaultValue={defaultValues?.contact ?? ''}
+          placeholder="Contoh: 08123456789 / Pak Budi"
+          aria-describedby={state.errors?.contact ? 'contact-error' : undefined}
+        />
+        {state.errors?.contact && (
+          <p id="contact-error" className="text-sm text-destructive">{state.errors.contact[0]}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="address">
           Alamat <span className="text-muted-foreground text-xs">(opsional)</span>
         </Label>
