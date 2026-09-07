@@ -65,29 +65,33 @@ export async function createPurchase(
   }
 
   try {
-    await db.transaction(async (tx) => {
-      const [newPurchase] = await tx
-        .insert(purchases)
-        .values({
-          supplierId,
-          purchaseDate,
-          paymentMethod: result.data.paymentMethod,
-          paymentStatus,
-        })
-        .returning({ id: purchases.id })
+    const [newPurchase] = await db
+      .insert(purchases)
+      .values({
+        supplierId,
+        purchaseDate,
+        paymentMethod: result.data.paymentMethod,
+        paymentStatus,
+      })
+      .returning({ id: purchases.id })
 
-      const itemValues = items.map((item) => ({
-        purchaseId: newPurchase.id,
-        productId: item.productId,
-        unit: item.unit,
-        qty: item.qty.toString(),
-        unitPrice: item.unitPrice.toString(),
-        subtotal: calculateSubtotal(item.qty, item.unitPrice).toString(),
-      }))
+    const itemValues = items.map((item) => ({
+      purchaseId: newPurchase.id,
+      productId: item.productId,
+      unit: item.unit,
+      qty: item.qty.toString(),
+      unitPrice: item.unitPrice.toString(),
+      subtotal: calculateSubtotal(item.qty, item.unitPrice).toString(),
+    }))
 
-      await tx.insert(purchaseItems).values(itemValues)
-    })
-  } catch {
+    try {
+      await db.insert(purchaseItems).values(itemValues)
+    } catch (itemError) {
+      await db.delete(purchases).where(eq(purchases.id, newPurchase.id))
+      throw itemError
+    }
+  } catch (error) {
+    console.error('Error creating purchase:', error)
     return { message: 'Gagal menyimpan pembelian. Silakan coba lagi.' }
   }
 
@@ -132,32 +136,31 @@ export async function updatePurchase(
   }
 
   try {
-    await db.transaction(async (tx) => {
-      await tx
-        .update(purchases)
-        .set({
-          supplierId,
-          purchaseDate,
-          paymentMethod: result.data.paymentMethod,
-          paymentStatus,
-          updatedAt: new Date(),
-        })
-        .where(eq(purchases.id, id))
+    await db
+      .update(purchases)
+      .set({
+        supplierId,
+        purchaseDate,
+        paymentMethod: result.data.paymentMethod,
+        paymentStatus,
+        updatedAt: new Date(),
+      })
+      .where(eq(purchases.id, id))
 
-      await tx.delete(purchaseItems).where(eq(purchaseItems.purchaseId, id))
+    await db.delete(purchaseItems).where(eq(purchaseItems.purchaseId, id))
 
-      const itemValues = items.map((item) => ({
-        purchaseId: id,
-        productId: item.productId,
-        unit: item.unit,
-        qty: item.qty.toString(),
-        unitPrice: item.unitPrice.toString(),
-        subtotal: calculateSubtotal(item.qty, item.unitPrice).toString(),
-      }))
+    const itemValues = items.map((item) => ({
+      purchaseId: id,
+      productId: item.productId,
+      unit: item.unit,
+      qty: item.qty.toString(),
+      unitPrice: item.unitPrice.toString(),
+      subtotal: calculateSubtotal(item.qty, item.unitPrice).toString(),
+    }))
 
-      await tx.insert(purchaseItems).values(itemValues)
-    })
-  } catch {
+    await db.insert(purchaseItems).values(itemValues)
+  } catch (error) {
+    console.error('Error updating purchase:', error)
     return { message: 'Gagal memperbarui pembelian. Silakan coba lagi.' }
   }
 

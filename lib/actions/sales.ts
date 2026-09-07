@@ -77,30 +77,34 @@ export async function createSale(
   }
 
   try {
-    await db.transaction(async (tx) => {
-      const [newSale] = await tx
-        .insert(sales)
-        .values({
-          customerId,
-          saleDate,
-          paymentMethod: result.data.paymentMethod,
-          paymentStatus,
-        })
-        .returning({ id: sales.id })
+    const [newSale] = await db
+      .insert(sales)
+      .values({
+        customerId,
+        saleDate,
+        paymentMethod: result.data.paymentMethod,
+        paymentStatus,
+      })
+      .returning({ id: sales.id })
 
-      const itemValues = items.map((item) => ({
-        saleId: newSale.id,
-        productId: item.productId,
-        unit: item.unit,
-        qty: item.qty.toString(),
-        unitPrice: item.unitPrice.toString(),
-        // Subtotal recalculated server-side — client value discarded
-        subtotal: calculateSubtotal(item.qty, item.unitPrice).toString(),
-      }))
+    const itemValues = items.map((item) => ({
+      saleId: newSale.id,
+      productId: item.productId,
+      unit: item.unit,
+      qty: item.qty.toString(),
+      unitPrice: item.unitPrice.toString(),
+      // Subtotal recalculated server-side — client value discarded
+      subtotal: calculateSubtotal(item.qty, item.unitPrice).toString(),
+    }))
 
-      await tx.insert(saleItems).values(itemValues)
-    })
-  } catch {
+    try {
+      await db.insert(saleItems).values(itemValues)
+    } catch (itemError) {
+      await db.delete(sales).where(eq(sales.id, newSale.id))
+      throw itemError
+    }
+  } catch (error) {
+    console.error('Error creating sale:', error)
     return { message: 'Gagal menyimpan penjualan. Silakan coba lagi.' }
   }
 
@@ -147,33 +151,32 @@ export async function updateSale(
   }
 
   try {
-    await db.transaction(async (tx) => {
-      await tx
-        .update(sales)
-        .set({
-          customerId,
-          saleDate,
-          paymentMethod: result.data.paymentMethod,
-          paymentStatus,
-          updatedAt: new Date(),
-        })
-        .where(eq(sales.id, id))
+    await db
+      .update(sales)
+      .set({
+        customerId,
+        saleDate,
+        paymentMethod: result.data.paymentMethod,
+        paymentStatus,
+        updatedAt: new Date(),
+      })
+      .where(eq(sales.id, id))
 
-      // Delete existing items and re-insert (simplest correct approach for edit)
-      await tx.delete(saleItems).where(eq(saleItems.saleId, id))
+    // Delete existing items and re-insert (simplest correct approach for edit)
+    await db.delete(saleItems).where(eq(saleItems.saleId, id))
 
-      const itemValues = items.map((item) => ({
-        saleId: id,
-        productId: item.productId,
-        unit: item.unit,
-        qty: item.qty.toString(),
-        unitPrice: item.unitPrice.toString(),
-        subtotal: calculateSubtotal(item.qty, item.unitPrice).toString(),
-      }))
+    const itemValues = items.map((item) => ({
+      saleId: id,
+      productId: item.productId,
+      unit: item.unit,
+      qty: item.qty.toString(),
+      unitPrice: item.unitPrice.toString(),
+      subtotal: calculateSubtotal(item.qty, item.unitPrice).toString(),
+    }))
 
-      await tx.insert(saleItems).values(itemValues)
-    })
-  } catch {
+    await db.insert(saleItems).values(itemValues)
+  } catch (error) {
+    console.error('Error updating sale:', error)
     return { message: 'Gagal memperbarui penjualan. Silakan coba lagi.' }
   }
 
