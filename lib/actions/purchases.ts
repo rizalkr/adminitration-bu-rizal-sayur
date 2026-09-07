@@ -79,7 +79,8 @@ export async function createPurchase(
       const itemValues = items.map((item) => ({
         purchaseId: newPurchase.id,
         productId: item.productId,
-        qty: item.qty,
+        unit: item.unit,
+        qty: item.qty.toString(),
         unitPrice: item.unitPrice.toString(),
         subtotal: calculateSubtotal(item.qty, item.unitPrice).toString(),
       }))
@@ -148,7 +149,8 @@ export async function updatePurchase(
       const itemValues = items.map((item) => ({
         purchaseId: id,
         productId: item.productId,
-        qty: item.qty,
+        unit: item.unit,
+        qty: item.qty.toString(),
         unitPrice: item.unitPrice.toString(),
         subtotal: calculateSubtotal(item.qty, item.unitPrice).toString(),
       }))

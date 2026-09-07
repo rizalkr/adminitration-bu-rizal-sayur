@@ -15,7 +15,8 @@ export async function getPurchases(): Promise<PurchaseWithSupplier[]> {
       createdAt: purchases.createdAt,
       updatedAt: purchases.updatedAt,
       totalAmount: sql<string>`COALESCE(SUM(${purchaseItems.subtotal}), 0)`,
-      totalQty: sql<number>`COALESCE(SUM(${purchaseItems.qty})::int, 0)`,
+      totalQtyEkor: sql<number>`COALESCE(SUM(CASE WHEN ${purchaseItems.unit} = 'ekor' THEN ${purchaseItems.qty} ELSE 0 END)::int, 0)`,
+      totalQtyKg: sql<string>`COALESCE(SUM(CASE WHEN ${purchaseItems.unit} = 'kg' THEN ${purchaseItems.qty} ELSE 0 END)::text, '0')`,
     })
     .from(purchases)
     .leftJoin(suppliers, eq(purchases.supplierId, suppliers.id))
@@ -50,6 +51,7 @@ export async function getPurchaseById(id: string): Promise<PurchaseDetail | null
         purchaseId: purchaseItems.purchaseId,
         productId: purchaseItems.productId,
         productName: products.name,
+        unit: purchaseItems.unit,
         qty: purchaseItems.qty,
         unitPrice: purchaseItems.unitPrice,
         subtotal: purchaseItems.subtotal,

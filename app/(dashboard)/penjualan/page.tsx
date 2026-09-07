@@ -11,8 +11,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { formatRupiah, formatDate } from '@/lib/utils'
+import { formatRupiah, formatDate, formatTotalQty } from '@/lib/utils'
 import type { PaymentMethod, PaymentStatus } from '@/types'
+
+export const dynamic = 'force-dynamic'
 
 export default async function PenjualanPage() {
   const sales = await getSales()
@@ -58,8 +60,8 @@ export default async function PenjualanPage() {
                 <TableCell className="text-right font-medium">
                   {formatRupiah(sale.totalAmount)}
                 </TableCell>
-                <TableCell className="text-right text-sm">
-                  {sale.totalQty} ekor
+                <TableCell className="text-right text-sm whitespace-nowrap">
+                  {formatTotalQty(sale.totalQtyEkor, sale.totalQtyKg)}
                 </TableCell>
                 <TableCell>
                   <PaymentStatusBadge

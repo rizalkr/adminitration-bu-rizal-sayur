@@ -4,6 +4,8 @@ import { createSale } from '@/lib/actions/sales'
 import { SaleForm } from '@/components/transactions/sale-form'
 import { PageHeader } from '@/components/layout/page-header'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PenjualanBaruPage() {
   const [products, customers] = await Promise.all([
     getActiveProducts(),

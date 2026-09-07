@@ -1,6 +1,6 @@
 import { getDashboardStats } from '@/lib/queries/dashboard'
 import { StatCard } from '@/components/dashboard/stat-card'
-import { formatRupiah, getTodayWIB, formatDate } from '@/lib/utils'
+import { formatRupiah, getTodayWIB, formatDate, formatTotalQty } from '@/lib/utils'
 import {
   ShoppingCart,
   PackageOpen,
@@ -8,11 +8,11 @@ import {
   AlertCircle,
 } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
   const stats = await getDashboardStats()
   const today = getTodayWIB()
-
-  const totalUnpaid = stats.unpaidSalesCount + stats.unpaidPurchasesCount
 
   return (
     <div>
@@ -24,25 +24,38 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         <StatCard
           title="Total Penjualan Hari Ini"
           value={formatRupiah(stats.salesTodayAmount)}
-          subtitle={`${stats.salesTodayQty} ekor terjual`}
+          subtitle={
+            stats.salesTodayQtyEkor > 0 || parseFloat(stats.salesTodayQtyKg) > 0
+              ? `Terjual: ${formatTotalQty(stats.salesTodayQtyEkor, stats.salesTodayQtyKg)}`
+              : 'Belum ada transaksi'
+          }
           icon={ShoppingCart}
         />
         <StatCard
           title="Total Pembelian Hari Ini"
           value={formatRupiah(stats.purchasesTodayAmount)}
-          subtitle={`${stats.purchasesTodayQty} ekor dibeli`}
+          subtitle={
+            stats.purchasesTodayQtyEkor > 0 || parseFloat(stats.purchasesTodayQtyKg) > 0
+              ? `Dibeli: ${formatTotalQty(stats.purchasesTodayQtyEkor, stats.purchasesTodayQtyKg)}`
+              : 'Belum ada transaksi'
+          }
           icon={PackageOpen}
         />
         <StatCard
-          title="Ekor Dijual Hari Ini"
-          value={stats.salesTodayQty.toString()}
-          subtitle="jumlah ekor"
+          title="Terjual Hari Ini"
+          value={formatTotalQty(stats.salesTodayQtyEkor, stats.salesTodayQtyKg)}
+          subtitle="Volume penjualan"
           icon={Bird}
-          className="col-span-2 md:col-span-1"
+        />
+        <StatCard
+          title="Dibeli Hari Ini"
+          value={formatTotalQty(stats.purchasesTodayQtyEkor, stats.purchasesTodayQtyKg)}
+          subtitle="Volume pembelian"
+          icon={PackageOpen}
         />
       </div>
 

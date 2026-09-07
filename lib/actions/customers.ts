@@ -43,6 +43,7 @@ export async function createCustomer(
   }
 
   revalidatePath('/pelanggan')
+  revalidatePath('/penjualan/baru')
   redirect('/pelanggan')
 }
 
@@ -75,6 +76,8 @@ export async function updateCustomer(
   }
 
   revalidatePath('/pelanggan')
+  revalidatePath('/penjualan/baru')
+  revalidatePath('/penjualan')
   redirect('/pelanggan')
 }
 
@@ -93,6 +96,8 @@ export async function toggleCustomerActive(id: string, isActive: boolean): Promi
   }
 
   revalidatePath('/pelanggan')
+  revalidatePath('/penjualan/baru')
+  revalidatePath('/penjualan')
   return {}
 }
 
@@ -115,5 +120,7 @@ export async function deleteCustomer(id: string): Promise<ActionState> {
   }
 
   revalidatePath('/pelanggan')
+  revalidatePath('/penjualan/baru')
+  revalidatePath('/penjualan')
   return {}
 }

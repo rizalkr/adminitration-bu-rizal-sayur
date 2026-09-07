@@ -11,8 +11,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { formatRupiah, formatDate } from '@/lib/utils'
+import { formatRupiah, formatDate, formatTotalQty } from '@/lib/utils'
 import type { PaymentMethod, PaymentStatus } from '@/types'
+
+export const dynamic = 'force-dynamic'
 
 export default async function PembelianPage() {
   const purchases = await getPurchases()
@@ -56,7 +58,9 @@ export default async function PembelianPage() {
                 <TableCell className="text-right font-medium">
                   {formatRupiah(purchase.totalAmount)}
                 </TableCell>
-                <TableCell className="text-right text-sm">{purchase.totalQty} ekor</TableCell>
+                <TableCell className="text-right text-sm whitespace-nowrap">
+                  {formatTotalQty(purchase.totalQtyEkor, purchase.totalQtyKg)}
+                </TableCell>
                 <TableCell>
                   <PaymentStatusBadge
                     status={purchase.paymentStatus as PaymentStatus}

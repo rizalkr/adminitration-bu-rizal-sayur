@@ -1,5 +1,5 @@
-import { pgTable, uuid, text, boolean, timestamp, date, integer, numeric, check } from 'drizzle-orm/pg-core'
-import { sql } from 'drizzle-orm'
+import { pgTable, uuid, text, boolean, timestamp, date, numeric, check } from 'drizzle-orm/pg-core'
+import { relations, sql } from 'drizzle-orm'
 
 // ---------------------------------------------------------------------------
 // Users
@@ -70,12 +70,15 @@ export const saleItems = pgTable('sale_items', {
   // CASCADE DELETE: removing a sale removes its items atomically
   saleId: uuid('sale_id').notNull().references(() => sales.id, { onDelete: 'cascade' }),
   productId: uuid('product_id').notNull().references(() => products.id),
-  qty: integer('qty').notNull(),
+  unit: text('unit').notNull(),
+  // numeric(10,2) allows decimal for kg (e.g. 25.50) and integer for ekor
+  qty: numeric('qty', { precision: 10, scale: 2 }).notNull(),
   // numeric(12,2) avoids floating-point issues with monetary values
   unitPrice: numeric('unit_price', { precision: 12, scale: 2 }).notNull(),
   // subtotal is always calculated server-side; client value is discarded
   subtotal: numeric('subtotal', { precision: 12, scale: 2 }).notNull(),
 }, (t) => [
+  check('sale_items_unit_check', sql`${t.unit} IN ('ekor', 'kg')`),
   check('sale_items_qty_check', sql`${t.qty} > 0`),
   check('sale_items_unit_price_check', sql`${t.unitPrice} >= 0`),
   check('sale_items_subtotal_check', sql`${t.subtotal} >= 0`),
@@ -101,11 +104,67 @@ export const purchaseItems = pgTable('purchase_items', {
   id: uuid('id').defaultRandom().primaryKey(),
   purchaseId: uuid('purchase_id').notNull().references(() => purchases.id, { onDelete: 'cascade' }),
   productId: uuid('product_id').notNull().references(() => products.id),
-  qty: integer('qty').notNull(),
+  unit: text('unit').notNull(),
+  qty: numeric('qty', { precision: 10, scale: 2 }).notNull(),
   unitPrice: numeric('unit_price', { precision: 12, scale: 2 }).notNull(),
   subtotal: numeric('subtotal', { precision: 12, scale: 2 }).notNull(),
 }, (t) => [
+  check('purchase_items_unit_check', sql`${t.unit} IN ('ekor', 'kg')`),
   check('purchase_items_qty_check', sql`${t.qty} > 0`),
   check('purchase_items_unit_price_check', sql`${t.unitPrice} >= 0`),
   check('purchase_items_subtotal_check', sql`${t.subtotal} >= 0`),
 ])
+
+// ---------------------------------------------------------------------------
+// Relations
+// ---------------------------------------------------------------------------
+export const customersRelations = relations(customers, ({ many }) => ({
+  sales: many(sales),
+}))
+
+export const suppliersRelations = relations(suppliers, ({ many }) => ({
+  purchases: many(purchases),
+}))
+
+export const productsRelations = relations(products, ({ many }) => ({
+  saleItems: many(saleItems),
+  purchaseItems: many(purchaseItems),
+}))
+
+export const salesRelations = relations(sales, ({ one, many }) => ({
+  customer: one(customers, {
+    fields: [sales.customerId],
+    references: [customers.id],
+  }),
+  items: many(saleItems),
+}))
+
+export const saleItemsRelations = relations(saleItems, ({ one }) => ({
+  sale: one(sales, {
+    fields: [saleItems.saleId],
+    references: [sales.id],
+  }),
+  product: one(products, {
+    fields: [saleItems.productId],
+    references: [products.id],
+  }),
+}))
+
+export const purchasesRelations = relations(purchases, ({ one, many }) => ({
+  supplier: one(suppliers, {
+    fields: [purchases.supplierId],
+    references: [suppliers.id],
+  }),
+  items: many(purchaseItems),
+}))
+
+export const purchaseItemsRelations = relations(purchaseItems, ({ one }) => ({
+  purchase: one(purchases, {
+    fields: [purchaseItems.purchaseId],
+    references: [purchases.id],
+  }),
+  product: one(products, {
+    fields: [purchaseItems.productId],
+    references: [products.id],
+  }),
+}))

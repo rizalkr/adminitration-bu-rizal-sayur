@@ -7,6 +7,8 @@ import { SaleForm } from '@/components/transactions/sale-form'
 import { PageHeader } from '@/components/layout/page-header'
 import type { PaymentMethod, PaymentStatus } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 interface Props {
   params: Promise<{ id: string }>
 }
@@ -31,6 +33,7 @@ export default async function EditPenjualanPage({ params }: Props) {
     paymentStatus: sale.paymentStatus as PaymentStatus,
     items: sale.items.map((item) => ({
       productId: item.productId,
+      unit: item.unit,
       qty: item.qty,
       unitPrice: parseFloat(item.unitPrice),
     })),

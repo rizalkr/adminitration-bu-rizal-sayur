@@ -4,6 +4,8 @@ import { createPurchase } from '@/lib/actions/purchases'
 import { PurchaseForm } from '@/components/transactions/purchase-form'
 import { PageHeader } from '@/components/layout/page-header'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PembelianBaruPage() {
   const [products, suppliers] = await Promise.all([
     getActiveProducts(),

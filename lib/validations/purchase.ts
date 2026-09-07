@@ -1,16 +1,28 @@
 import { z } from 'zod'
-import { PAYMENT_METHODS, PAYMENT_STATUSES } from '@/types'
+import { PAYMENT_METHODS, PAYMENT_STATUSES, TRANSACTION_UNITS } from '@/types'
 
-export const purchaseItemSchema = z.object({
-  productId: z.string().uuid('ID produk tidak valid'),
-  qty: z.coerce
-    .number({ message: 'Jumlah harus berupa angka' })
-    .int('Jumlah harus bilangan bulat')
-    .positive('Jumlah harus lebih dari 0'),
-  unitPrice: z.coerce
-    .number({ message: 'Harga harus berupa angka' })
-    .nonnegative('Harga tidak boleh negatif'),
-})
+export const purchaseItemSchema = z
+  .object({
+    productId: z.string().uuid('ID produk tidak valid'),
+    unit: z.enum(TRANSACTION_UNITS, {
+      message: 'Satuan tidak valid (harus ekor atau kg)',
+    }),
+    qty: z.coerce
+      .number({ message: 'Jumlah harus berupa angka' })
+      .positive('Jumlah harus lebih dari 0'),
+    unitPrice: z.coerce
+      .number({ message: 'Harga harus berupa angka' })
+      .nonnegative('Harga tidak boleh negatif'),
+  })
+  .superRefine((item, ctx) => {
+    if (item.unit === 'ekor' && !Number.isInteger(item.qty)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Jumlah untuk satuan ekor harus bilangan bulat',
+        path: ['qty'],
+      })
+    }
+  })
 
 export const purchaseSchema = z
   .object({

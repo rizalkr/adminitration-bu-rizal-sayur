@@ -7,6 +7,7 @@ import { PaymentStatusBadge } from '@/components/transactions/payment-status-bad
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import { Badge } from '@/components/ui/badge'
 import {
   Table,
   TableBody,
@@ -15,8 +16,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { formatRupiah, formatDate } from '@/lib/utils'
+import { formatRupiah, formatDate, formatQty } from '@/lib/utils'
 import type { PaymentMethod, PaymentStatus } from '@/types'
+
+export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -31,7 +34,12 @@ export default async function PembelianDetailPage({ params }: Props) {
     (sum, item) => sum + parseFloat(item.subtotal),
     0,
   )
-  const totalQty = purchase.items.reduce((sum, item) => sum + item.qty, 0)
+  const totalQtyEkor = purchase.items
+    .filter((item) => item.unit === 'ekor')
+    .reduce((sum, item) => sum + (parseFloat(item.qty) || 0), 0)
+  const totalQtyKg = purchase.items
+    .filter((item) => item.unit === 'kg')
+    .reduce((sum, item) => sum + (parseFloat(item.qty) || 0), 0)
   const isLunas = purchase.paymentStatus === 'Lunas'
 
   return (
@@ -77,10 +85,24 @@ export default async function PembelianDetailPage({ params }: Props) {
               <span className="text-muted-foreground">Total Item</span>
               <span>{purchase.items.length} item</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Total Ekor</span>
-              <span>{totalQty} ekor</span>
-            </div>
+            {totalQtyEkor > 0 && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Total Ekor</span>
+                <span>{Math.round(totalQtyEkor)} ekor</span>
+              </div>
+            )}
+            {totalQtyKg > 0 && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Total Kg</span>
+                <span>{parseFloat(totalQtyKg.toFixed(2))} kg</span>
+              </div>
+            )}
+            {totalQtyEkor === 0 && totalQtyKg === 0 && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Total Volume</span>
+                <span>0</span>
+              </div>
+            )}
             <Separator />
             <div className="flex justify-between font-bold text-base">
               <span>Total</span>
@@ -99,17 +121,27 @@ export default async function PembelianDetailPage({ params }: Props) {
             <TableHeader>
               <TableRow>
                 <TableHead>Produk</TableHead>
+                <TableHead>Satuan</TableHead>
                 <TableHead className="text-right">Qty</TableHead>
-                <TableHead className="text-right">Harga / Ekor</TableHead>
+                <TableHead className="text-right">Harga Satuan</TableHead>
                 <TableHead className="text-right">Subtotal</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {purchase.items.map((item) => (
                 <TableRow key={item.id}>
-                  <TableCell>{item.productName ?? '-'}</TableCell>
-                  <TableCell className="text-right">{item.qty}</TableCell>
-                  <TableCell className="text-right">{formatRupiah(item.unitPrice)}</TableCell>
+                  <TableCell className="font-medium">{item.productName ?? '-'}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="capitalize">
+                      {item.unit}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {formatQty(item.qty, item.unit)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {formatRupiah(item.unitPrice)} / {item.unit}
+                  </TableCell>
                   <TableCell className="text-right font-medium">{formatRupiah(item.subtotal)}</TableCell>
                 </TableRow>
               ))}

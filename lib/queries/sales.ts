@@ -16,7 +16,8 @@ export async function getSales(): Promise<SaleWithCustomer[]> {
       updatedAt: sales.updatedAt,
       // Aggregate across joined items; COALESCE handles sales with no items (edge case)
       totalAmount: sql<string>`COALESCE(SUM(${saleItems.subtotal}), 0)`,
-      totalQty: sql<number>`COALESCE(SUM(${saleItems.qty})::int, 0)`,
+      totalQtyEkor: sql<number>`COALESCE(SUM(CASE WHEN ${saleItems.unit} = 'ekor' THEN ${saleItems.qty} ELSE 0 END)::int, 0)`,
+      totalQtyKg: sql<string>`COALESCE(SUM(CASE WHEN ${saleItems.unit} = 'kg' THEN ${saleItems.qty} ELSE 0 END)::text, '0')`,
     })
     .from(sales)
     // LEFT JOIN so sales still appear even if items are somehow missing
@@ -54,6 +55,7 @@ export async function getSaleById(id: string): Promise<SaleDetail | null> {
         productId: saleItems.productId,
         // No isActive filter — show product name even if subsequently deactivated
         productName: products.name,
+        unit: saleItems.unit,
         qty: saleItems.qty,
         unitPrice: saleItems.unitPrice,
         subtotal: saleItems.subtotal,

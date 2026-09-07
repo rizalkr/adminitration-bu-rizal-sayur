@@ -45,10 +45,37 @@ export function getTodayWIB(): string {
 
 /**
  * Calculate subtotal server-side.
- * qty is an integer; unitPrice is a numeric string from form input.
+ * qty is a number (integer for ekor, decimal for kg); unitPrice is a numeric number.
  */
 export function calculateSubtotal(qty: number, unitPrice: number): number {
   return Math.round(qty * unitPrice * 100) / 100
+}
+
+/**
+ * Format quantity display with its unit.
+ * Ekor is formatted as an integer, kg displays decimal without trailing zeros.
+ */
+export function formatQty(qty: number | string, unit: string): string {
+  const num = typeof qty === 'string' ? parseFloat(qty) : qty
+  if (isNaN(num)) return `0 ${unit}`
+  if (unit === 'ekor') {
+    return `${Math.round(num)} ekor`
+  }
+  const str = Number.isInteger(num) ? num.toString() : parseFloat(num.toFixed(2)).toString()
+  return `${str} kg`
+}
+
+/**
+ * Format combined quantity display for summary lists (ekor and/or kg).
+ * Example: "10 ekor", "25.5 kg", or "10 ekor, 25.5 kg". Never sums ekor + kg.
+ */
+export function formatTotalQty(qtyEkor: number | string, qtyKg: number | string): string {
+  const ekor = typeof qtyEkor === 'string' ? parseFloat(qtyEkor) : qtyEkor
+  const kg = typeof qtyKg === 'string' ? parseFloat(qtyKg) : qtyKg
+  const parts: string[] = []
+  if (ekor > 0) parts.push(formatQty(ekor, 'ekor'))
+  if (kg > 0) parts.push(formatQty(kg, 'kg'))
+  return parts.length > 0 ? parts.join(', ') : '0'
 }
 
 /**

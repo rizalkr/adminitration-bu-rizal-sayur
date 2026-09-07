@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { products, saleItems, purchaseItems } from '@/lib/db/schema'
-import { eq, desc, count, or } from 'drizzle-orm'
+import { eq, desc, count } from 'drizzle-orm'
 
 export async function getProducts(includeInactive = false) {
   if (includeInactive) {

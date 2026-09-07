@@ -91,7 +91,8 @@ export async function createSale(
       const itemValues = items.map((item) => ({
         saleId: newSale.id,
         productId: item.productId,
-        qty: item.qty,
+        unit: item.unit,
+        qty: item.qty.toString(),
         unitPrice: item.unitPrice.toString(),
         // Subtotal recalculated server-side — client value discarded
         subtotal: calculateSubtotal(item.qty, item.unitPrice).toString(),
@@ -164,7 +165,8 @@ export async function updateSale(
       const itemValues = items.map((item) => ({
         saleId: id,
         productId: item.productId,
-        qty: item.qty,
+        unit: item.unit,
+        qty: item.qty.toString(),
         unitPrice: item.unitPrice.toString(),
         subtotal: calculateSubtotal(item.qty, item.unitPrice).toString(),
       }))

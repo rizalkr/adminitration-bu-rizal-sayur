@@ -7,6 +7,8 @@ import { PurchaseForm } from '@/components/transactions/purchase-form'
 import { PageHeader } from '@/components/layout/page-header'
 import type { PaymentMethod, PaymentStatus } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 interface Props {
   params: Promise<{ id: string }>
 }
@@ -31,6 +33,7 @@ export default async function EditPembelianPage({ params }: Props) {
     paymentStatus: purchase.paymentStatus as PaymentStatus,
     items: purchase.items.map((item) => ({
       productId: item.productId,
+      unit: item.unit,
       qty: item.qty,
       unitPrice: parseFloat(item.unitPrice),
     })),

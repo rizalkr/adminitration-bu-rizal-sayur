@@ -35,6 +35,8 @@ export async function createProduct(
   }
 
   revalidatePath('/produk')
+  revalidatePath('/penjualan/baru')
+  revalidatePath('/pembelian/baru')
   redirect('/produk')
 }
 
@@ -58,6 +60,8 @@ export async function updateProduct(
   }
 
   revalidatePath('/produk')
+  revalidatePath('/penjualan/baru')
+  revalidatePath('/pembelian/baru')
   redirect('/produk')
 }
 
@@ -72,6 +76,8 @@ export async function toggleProductActive(id: string, isActive: boolean): Promis
   }
 
   revalidatePath('/produk')
+  revalidatePath('/penjualan/baru')
+  revalidatePath('/pembelian/baru')
   return {}
 }
 
@@ -93,5 +99,7 @@ export async function deleteProduct(id: string): Promise<ActionState> {
   }
 
   revalidatePath('/produk')
+  revalidatePath('/penjualan/baru')
+  revalidatePath('/pembelian/baru')
   return {}
 }

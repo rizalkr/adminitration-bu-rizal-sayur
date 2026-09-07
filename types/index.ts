@@ -27,9 +27,11 @@ export type PurchaseItem = InferSelectModel<typeof purchaseItems>
 // ---------------------------------------------------------------------------
 export const PAYMENT_METHODS = ['Cash', 'Transfer', 'Hutang'] as const
 export const PAYMENT_STATUSES = ['Lunas', 'Belum Lunas'] as const
+export const TRANSACTION_UNITS = ['ekor', 'kg'] as const
 
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number]
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number]
+export type TransactionUnit = (typeof TRANSACTION_UNITS)[number]
 
 // ---------------------------------------------------------------------------
 // Composite query result types
@@ -37,13 +39,15 @@ export type PaymentStatus = (typeof PAYMENT_STATUSES)[number]
 export type SaleWithCustomer = Sale & {
   customerName: string | null
   totalAmount: string
-  totalQty: number
+  totalQtyEkor: number
+  totalQtyKg: string
 }
 
 export type PurchaseWithSupplier = Purchase & {
   supplierName: string | null
   totalAmount: string
-  totalQty: number
+  totalQtyEkor: number
+  totalQtyKg: string
 }
 
 export type SaleItemWithProduct = {
@@ -51,7 +55,8 @@ export type SaleItemWithProduct = {
   saleId: string
   productId: string
   productName: string | null
-  qty: number
+  unit: TransactionUnit
+  qty: string
   unitPrice: string
   subtotal: string
 }
@@ -61,7 +66,8 @@ export type PurchaseItemWithProduct = {
   purchaseId: string
   productId: string
   productName: string | null
-  qty: number
+  unit: TransactionUnit
+  qty: string
   unitPrice: string
   subtotal: string
 }
@@ -82,8 +88,10 @@ export type PurchaseDetail = Purchase & {
 export type DashboardStats = {
   salesTodayAmount: string
   purchasesTodayAmount: string
-  salesTodayQty: number
-  purchasesTodayQty: number
+  salesTodayQtyEkor: number
+  salesTodayQtyKg: string
+  purchasesTodayQtyEkor: number
+  purchasesTodayQtyKg: string
   unpaidSalesCount: number
   unpaidPurchasesCount: number
 }

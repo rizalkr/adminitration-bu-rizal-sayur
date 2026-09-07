@@ -42,6 +42,7 @@ export async function createSupplier(
   }
 
   revalidatePath('/pemasok')
+  revalidatePath('/pembelian/baru')
   redirect('/pemasok')
 }
 
@@ -75,6 +76,8 @@ export async function updateSupplier(
   }
 
   revalidatePath('/pemasok')
+  revalidatePath('/pembelian/baru')
+  revalidatePath('/pembelian')
   redirect('/pemasok')
 }
 
@@ -89,6 +92,8 @@ export async function toggleSupplierActive(id: string, isActive: boolean): Promi
   }
 
   revalidatePath('/pemasok')
+  revalidatePath('/pembelian/baru')
+  revalidatePath('/pembelian')
   return {}
 }
 
@@ -110,5 +115,7 @@ export async function deleteSupplier(id: string): Promise<ActionState> {
   }
 
   revalidatePath('/pemasok')
+  revalidatePath('/pembelian/baru')
+  revalidatePath('/pembelian')
   return {}
 }
